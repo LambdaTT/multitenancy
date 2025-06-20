@@ -1,9 +1,9 @@
 <?php
 
-namespace application\eventlisteners;
+namespace Multitenancy\EventListeners;
 
-use \engine\EventListener;
-use \engine\DbConnections;
+use SplitPHP\EventListener;
+use SplitPHP\database\DbConnections;
 use Exception;
 
 class Multitenancy extends EventListener

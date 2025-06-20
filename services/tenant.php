@@ -1,8 +1,8 @@
 <?php
 
-namespace application\services\multitenancy;
+namespace Multitenancy\Services;
 
-use \engine\Service;
+use SplitPHP\Service;
 
 class Tenant extends Service
 {
