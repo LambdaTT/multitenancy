@@ -16,8 +16,8 @@ class Multitenancy extends EventListener
 
       $reqArgs = $evt->info()->getArgs();
 
-      if (!empty($reqArgs['tenant_domain'])) {
-        $tenant = $this->getService('multitenancy/tenant')->get($reqArgs['tenant_domain']);
+      if (!empty($reqArgs['tenant_key'])) {
+        $tenant = $this->getService('multitenancy/tenant')->get($reqArgs['tenant_key']);
       } else {
         $tenant = $this->getService('multitenancy/tenant')->detect();
         // Handle IAM reset pass for multitenancy:
@@ -26,10 +26,9 @@ class Multitenancy extends EventListener
           define('RESETPASS_URL', "https://{$host}/reset-password");
       }
 
-      if (empty($tenant)) throw new Exception("Invalid tenant's app domain.");
+      if (empty($tenant)) throw new Exception("It was not possible to identify the tenant with provided key.");
 
-      $tenantId = $tenant->ds_app_domain;
-      define('TENANT_DOMAIN', $tenantId);
+      define('TENANT_KEY', $tenant->ds_key);
       define('TENANT_NAME', $tenant->ds_name);
 
       // Change database connections to point to tenant's database:

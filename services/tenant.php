@@ -13,18 +13,18 @@ class Tenant extends Service
     // Find Tenant ID from origin's request:
     $origin = isset($_SERVER['HTTP_TENANT_DOMAIN']) ? $_SERVER['HTTP_TENANT_DOMAIN'] : parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host'];
 
-    $tenantDomain = str_replace('admin-', '', $origin);
-    $tenantDomain = str_replace('.sindiapp.app.br', '', $tenantDomain);
+    $tenantKey = str_replace('admin-', '', $origin);
+    $tenantKey = str_replace('.sindiapp.app.br', '', $tenantKey);
 
     // With tenant's domain, retrieve it from database):
-    return $this->get($tenantDomain);
+    return $this->get($tenantKey);
   }
 
-  public function get($tenantDomain)
+  public function get($tenantKey)
   {
     if (empty(self::$tenant)) {
       self::$tenant = $this->getDao('SND_TENANT')
-        ->filter('ds_app_domain')->equalsTo($tenantDomain)
+        ->filter('ds_key')->equalsTo($tenantKey)
         ->first();
     }
 
