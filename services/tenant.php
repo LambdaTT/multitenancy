@@ -8,6 +8,13 @@ class Tenant extends Service
 {
   private static $tenant = null;
 
+  public function list($params = [])
+  {
+    return $this->getDao('MTN_TENANT')
+      ->bindParams($params)
+      ->find();
+  }
+
   public function detect()
   {
     // Find Tenant ID from origin's request:
