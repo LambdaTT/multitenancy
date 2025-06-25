@@ -10,7 +10,7 @@ class CreateTableTenant extends Migration
   public function apply()
   {
     $this->onDatabase('multitenancy')
-      ->Table('MTN_TENANT')
+      ->Table('MTN_TENANT', 'Tenant')
       ->id('id_snd_tenant') // int primary key auto increment
       ->string('ds_key', 60)
       ->datetime('dt_created')->setDefaultValue(DbVocab::SQL_CURTIMESTAMP())
