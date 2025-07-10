@@ -3,18 +3,18 @@
 namespace Multitenancy\EventListeners;
 
 use SplitPHP\EventListener;
-use SplitPHP\database\DbConnections;
+use SplitPHP\Database\Dao;
 use Exception;
 
 class Multitenancy extends EventListener
 {
-  public function init()
+  public function init(): void
   {
-    $this->addEventListener('onRequest', function ($evt) {
+    $this->addEventListener('request.before', function ($evt) {
       // Exclude Logs and API Docs from multitenancy:
       if (preg_match('/^\/log(?:$|\/.*)$/', $_SERVER['REQUEST_URI']) || $_SERVER['REQUEST_URI'] == '/') return;
 
-      $reqArgs = $evt->info()->getArgs();
+      $reqArgs = $evt->info()->getBody();
 
       if (!empty($reqArgs['tenant_key'])) {
         $tenant = $this->getService('multitenancy/tenant')->get($reqArgs['tenant_key']);
@@ -32,21 +32,7 @@ class Multitenancy extends EventListener
       define('TENANT_NAME', $tenant->ds_name);
 
       // Change database connections to point to tenant's database:
-      DbConnections::change('main', [
-        DBHOST,
-        DBPORT,
-        $tenant->ds_database_name,
-        $tenant->ds_database_user_main,
-        $tenant->ds_database_pass_main,
-      ]);
-
-      DbConnections::change('readonly', [
-        DBHOST,
-        DBPORT,
-        $tenant->ds_database_name,
-        $tenant->ds_database_user_readonly,
-        $tenant->ds_database_pass_readonly,
-      ]);
+      Dao::selectDatabase($tenant->ds_database_name);
     });
   }
 }
