@@ -2,7 +2,7 @@
 
 namespace Multitenancy\Migrations;
 
-use SplitPHP\DbMigrations\Migration;
+use SplitPHP\DbManager\Migration;
 use SplitPHP\Database\DbVocab;
 
 class CreateTableTenant extends Migration
@@ -17,10 +17,8 @@ class CreateTableTenant extends Migration
       ->datetime('dt_updated')->nullable()->setDefaultValue(null)
       ->string('ds_name', 100)
       ->string('ds_database_name', 100)
-      ->string('ds_database_user_main', 100)
-      ->string('ds_database_pass_main', 100)
-      ->string('ds_database_user_readonly', 100)
-      ->string('ds_database_pass_readonly', 100)
+      ->string('ds_database_user', 100)
+      ->string('ds_database_pass', 100)
       ->Index('KEY', DbVocab::IDX_UNIQUE)->onColumn('ds_key');
   }
 }

@@ -30,7 +30,7 @@ class Tenant extends Service
   public function get($tenantKey)
   {
     if (empty(self::$tenant)) {
-      self::$tenant = $this->getDao('SND_TENANT')
+      self::$tenant = $this->getDao('MTN_TENANT')
         ->filter('ds_key')->equalsTo($tenantKey)
         ->first();
     }
