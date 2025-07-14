@@ -41,10 +41,12 @@ class Multitenancy extends EventListener
     });
 
     $this->addEventListener('command.before', function ($evt) {
-      if (!Dbmetadata::tableExists('MTN_TENANT')) return;
+      $execution = $evt->info();
+      $module = $execution->getArgs()['--module'] ?? null;
+
+      if ($module == 'multitenancy' || !Dbmetadata::tableExists('MTN_TENANT')) return;
 
       $evt->stopPropagation();
-      $execution = $evt->info();
 
       if (array_key_exists('--tenant-key', $execution->getArgs())) {
         $tenantKey = $execution->getArgs()['--tenant-key'];
