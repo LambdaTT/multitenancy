@@ -7,7 +7,7 @@ use SplitPHP\Utils;
 
 class Commands extends Cli
 {
-  public function init()
+  public function init(): void
   {
     $this->addCommand('tenants:list', function ($args) {
       $getRows = function ($params) {
