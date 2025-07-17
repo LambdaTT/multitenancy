@@ -17,7 +17,7 @@ class Multitenancy extends EventListener
 
     $this->addEventListener('request.before', function ($evt) {
       // Exclude Logs and API Docs from multitenancy:
-      if (preg_match('/^\/log(?:$|\/.*)$/', $_SERVER['REQUEST_URI']) || $_SERVER['REQUEST_URI'] == '/') return;
+      if ($_SERVER['REQUEST_URI'] == '/') return;
 
       $reqArgs = $evt->info()->getBody();
 
