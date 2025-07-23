@@ -19,10 +19,12 @@ class Multitenancy extends EventListener
       // Exclude Logs and API Docs from multitenancy:
       if ($_SERVER['REQUEST_URI'] == '/') return;
 
-      $reqArgs = $evt->info()->getBody();
+      $req = $evt->info();
+      $reqArgs = $req->getBody();
 
       if (!empty($reqArgs['tenant_key'])) {
         $tenant = $this->getService('multitenancy/tenant')->get($reqArgs['tenant_key']);
+        $req->unsetBody('tenant_key');
       } else {
         $tenant = $this->getService('multitenancy/tenant')->detect();
         // Handle IAM reset pass for multitenancy:
