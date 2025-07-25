@@ -3,6 +3,7 @@
 namespace Multitenancy\EventListeners;
 
 use SplitPHP\System;
+use SplitPHP\Execution;
 use SplitPHP\Utils;
 use SplitPHP\EventListener;
 use SplitPHP\Database\Database;
@@ -67,7 +68,9 @@ class Multitenancy extends EventListener
         Utils::printLn();
         Database::setName($t->ds_database_name);
 
-        System::runCommand($execution);
+        $newExecution = new Execution(['console', $execution->getCliName() . $execution->getCmd(), ...$execution->getArgs()]);
+
+        System::runCommand($newExecution);
       }
     });
   }
