@@ -8,6 +8,7 @@ use SplitPHP\Utils;
 use SplitPHP\EventListener;
 use SplitPHP\Database\Database;
 use SplitPHP\Database\Dbmetadata;
+use SplitPHP\Exceptions\NotFound;
 use Exception;
 
 class Multitenancy extends EventListener
@@ -28,13 +29,13 @@ class Multitenancy extends EventListener
         $req->unsetBody('tenant_key');
       } else {
         $tenant = $this->getService('multitenancy/tenant')->detect();
+
         // Handle IAM reset pass for multitenancy:
-        $host = parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host'];
         if (empty(getenv('RESETPASS_URL')))
-          define('RESETPASS_URL', "https://{$host}/reset-password");
+          define('RESETPASS_URL', "https://" . TENANT_HOST . "/reset-password");
       }
 
-      if (empty($tenant)) throw new Exception("It was not possible to identify the tenant with provided key.");
+      if (empty($tenant)) throw new NotFound("It was not possible to identify the tenant with provided key.");
 
       define('TENANT_KEY', $tenant->ds_key);
       define('TENANT_NAME', $tenant->ds_name);

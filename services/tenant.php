@@ -3,6 +3,7 @@
 namespace Multitenancy\Services;
 
 use SplitPHP\Service;
+use SplitPHP\Exceptions\BadRequest;
 
 class Tenant extends Service
 {
@@ -17,13 +18,13 @@ class Tenant extends Service
 
   public function detect()
   {
-    // Find Tenant ID from origin's request:
-    $origin = isset($_SERVER['HTTP_TENANT_DOMAIN']) ? $_SERVER['HTTP_TENANT_DOMAIN'] : parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host'];
+    // Find Tenant key from origin's request:
+    define('TENANT_HOST', isset($_SERVER['HTTP_TENANT_KEY']) ? $_SERVER['HTTP_TENANT_KEY'] : parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host']);
 
-    $tenantKey = str_replace('fila-', '', $origin);
-    $tenantKey = str_replace('admin-', '', $origin);
-    $tenantKey = str_replace('.sindiapp.app.br', '', $tenantKey);
+    $hostData = explode('.', TENANT_HOST);
+    if (empty($hostData)) throw new BadRequest("The request host does not contain a valid tenant key.");
 
+    $tenantKey = $hostData[0];
     // With tenant's domain, retrieve it from database):
     return $this->get($tenantKey);
   }
