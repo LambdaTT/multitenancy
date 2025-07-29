@@ -19,19 +19,13 @@ class Stash extends Service
   private static string $STASH_PATH;
 
   /**
-   * The stash array that holds the key-value pairs.
-   * @var array $stash
-   */
-  private array $stash;
-
-  /**
    * Constructor initializes the stash service.
    * It sets the path for the stash file based on the TENANT_KEY constant,
    * creates the directory if it does not exist, and loads existing data from the file.
    */
   public function __construct()
   {
-    self::$STASH_PATH = dirname(__DIR__) . '/stash/' . TENANT_KEY . '.json';
+    self::$STASH_PATH = dirname(__DIR__, 3) . '/cache/multitenancy/stash/' . TENANT_KEY . '.json';
 
     if (!is_dir(dirname(self::$STASH_PATH))) {
       mkdir(dirname(self::$STASH_PATH), 0755, true);
@@ -39,20 +33,7 @@ class Stash extends Service
 
     if (!file_exists(self::$STASH_PATH)) {
       file_put_contents(self::$STASH_PATH, json_encode([]));
-      $this->stash = [];
-    } else {
-      $this->stash = json_decode(file_get_contents(self::$STASH_PATH), true);
     }
-  }
-
-  /**
-   * Destructor saves the current stash back to the file.
-   * This ensures that any changes made during the request are persisted.
-   */
-  public function __destruct()
-  {
-    // Save the stash back to the file
-    file_put_contents(self::$STASH_PATH, json_encode($this->stash));
   }
 
   /**
@@ -62,13 +43,14 @@ class Stash extends Service
    * @param string|null $key The key to retrieve from the stash.
    * @return mixed The value associated with the key, or null if not found.
    */
-  public function get(?string $key = null)
+  public function get(?string $key = null, $default = null)
   {
+    $stash = json_decode(file_get_contents(self::$STASH_PATH), true);
     if ($key === null) {
-      return $this->stash;
+      return $stash;
     }
 
-    return $this->stash[$key] ?? null;
+    return $stash[$key] ?? ($default ?? null);
   }
 
   /**
@@ -79,6 +61,8 @@ class Stash extends Service
    */
   public function set(string $key, $value)
   {
-    $this->stash[$key] = $value;
+    $stash = json_decode(file_get_contents(self::$STASH_PATH), true);
+    $stash[$key] = $value;
+    file_put_contents(self::$STASH_PATH, json_encode($stash));
   }
 }
