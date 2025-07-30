@@ -46,6 +46,23 @@ class Multitenancy extends EventListener
 
     $this->addEventListener('command.before', function ($evt) {
       $execution = $evt->info();
+
+      $ignoreList = [
+        'server:start',
+        'server:stop',
+        'setup',
+        'help',
+        'generate:cli',
+        'generate:migration',
+        'generate:seed',
+        'generate:webservice',
+      ];
+
+      $fullCommand = $execution->getFullCmd();
+      if (in_array($fullCommand, $ignoreList)) {
+        return;
+      }
+
       $module = $execution->getArgs()['--module'] ?? null;
 
       if ($module == 'multitenancy' || !Dbmetadata::tableExists('MTN_TENANT')) return;
@@ -69,9 +86,10 @@ class Multitenancy extends EventListener
         Utils::printLn();
         Database::setName($t->ds_database_name);
 
-        $newExecution = new Execution(['console', $execution->getCliName() . $execution->getCmd(), ...$execution->getArgs()]);
-
+        $newExecution = new Execution(['console', $fullCommand, ...$execution->getArgs()]);
         System::runCommand($newExecution);
+
+        unset($newExecution);
       }
     });
   }
