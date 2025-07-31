@@ -49,6 +49,7 @@ class Multitenancy extends EventListener
 
       $ignoreList = [
         'server:start',
+        'server:status',
         'server:stop',
         'setup',
         'help',
