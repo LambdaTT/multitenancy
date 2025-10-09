@@ -39,4 +39,14 @@ class Tenant extends Service
 
     return self::$tenant;
   }
+
+  public static function getKey()
+  {
+    return self::$tenant->ds_app_domain ?? null;
+  }
+
+  public static function getName()
+  {
+    return self::$tenant->ds_name ?? null;
+  }
 }
