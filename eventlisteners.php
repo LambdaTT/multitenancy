@@ -15,6 +15,8 @@ class Multitenancy extends EventListener
 {
   public function init(): void
   {
+    if(empty(DB_CONNECT) || DB_CONNECT != 'on') return;
+    
     require_once CORE_PATH . '/database/' . Database::getRdbmsName() . '/class.dbmetadata.php';
 
     $this->addEventListener('request.before', function ($evt) {
