@@ -156,7 +156,7 @@ class Metadata extends WebService
       $name = $this->getService('utils/misc')->stringToSlug($tenant->ds_name);
       foreach (self::ICON_SIZES as $size) {
         $filename = "{$name}-icon-{$size}.png";
-        $outputPath = ROOT_PATH . "/application/cache/{$filename}";
+        $outputPath = ROOT_PATH . "/cache/{$filename}";
         $this->resizeImg($tmpFile, $outputPath, $size, $size);
         $this->saveIcon($filename, $size);
         unlink($outputPath);
@@ -222,7 +222,7 @@ class Metadata extends WebService
 
   private function saveIcon($filename, $size)
   {
-    $path = ROOT_PATH . "/application/cache/{$filename}";
+    $path = ROOT_PATH . "/cache/{$filename}";
     $filename = 'icn-' . uniqid() . $filename;
 
     // Save the icon in S3
