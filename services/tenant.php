@@ -2,6 +2,8 @@
 
 namespace Multitenancy\Services;
 
+use Exception;
+use SplitPHP\Database\Database;
 use SplitPHP\Service;
 use SplitPHP\Exceptions\BadRequest;
 
@@ -16,12 +18,24 @@ class Tenant extends Service
       ->find();
   }
 
+  public function execPerTenant(callable $fn)
+  {
+    $tenants = $this->list();
+    if (empty($tenants)) throw new Exception("No tenants found. Please create at least one tenant before running this.");
+
+    foreach ($tenants as $tenant) {
+      self::$tenant = $tenant;
+      Database::setName($tenant->ds_database_name);
+      $fn($tenant);
+    }
+  }
+
   public function detect()
   {
     // Find Tenant key from origin's request:
-    define('TENANT_HOST', isset($_SERVER['HTTP_TENANT_KEY']) ? $_SERVER['HTTP_TENANT_KEY'] : parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host']);
+    $host = isset($_SERVER['HTTP_TENANT_KEY']) ? $_SERVER['HTTP_TENANT_KEY'] : parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host'];
 
-    $hostData = explode('.', TENANT_HOST);
+    $hostData = explode('.', $host);
     if (empty($hostData)) throw new BadRequest("The request host does not contain a valid tenant key.");
 
     $tenantKey = $hostData[0];
@@ -31,22 +45,30 @@ class Tenant extends Service
 
   public function get($tenantKey)
   {
-    if (empty(self::$tenant)) {
-      self::$tenant = $this->getDao('MTN_TENANT')
-        ->filter('ds_key')->equalsTo($tenantKey)
-        ->first();
-    }
+    self::$tenant = $this->getDao('MTN_TENANT')
+      ->filter('ds_key')->equalsTo($tenantKey)
+      ->first();
 
     return self::$tenant;
   }
 
   public static function getKey()
   {
-    return self::$tenant->ds_app_domain ?? null;
+    return self::$tenant->ds_key ?? null;
   }
 
   public static function getName()
   {
     return self::$tenant->ds_name ?? null;
+  }
+
+  public static function getHost()
+  {
+    return isset($_SERVER['HTTP_TENANT_KEY']) ? $_SERVER['HTTP_TENANT_KEY'] : parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host'];
+  }
+
+  public static function getCurrent()
+  {
+    return self::$tenant;
   }
 }
