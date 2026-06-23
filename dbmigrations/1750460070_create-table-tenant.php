@@ -21,7 +21,7 @@ class CreateTableTenant extends Migration
       ->string('ds_database_user', 100)
       ->string('ds_database_pass', 100)
       ->Index('KEY', DbVocab::IDX_UNIQUE)->onColumn('ds_subdomain')
-      ->Index('KEY', DbVocab::IDX_UNIQUE)->onColumn('ds_customkey')
+      ->Index('CUSTOM_KEY', DbVocab::IDX_UNIQUE)->onColumn('ds_customkey')
       ;
   }
 }
