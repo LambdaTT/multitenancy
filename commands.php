@@ -63,9 +63,14 @@ class Commands extends Cli
           'required' => true,
           'length' => 100,
         ],
+        'ds_customkey' => [
+          'label' => 'Custom Key (optional)',
+          'required' => false,
+          'length' => 255,
+        ],
       ]);
 
-      $tenant->ds_key = $this->getService('utils/misc')->stringToSlug($tenant->ds_name);
+      $tenant->ds_subdomain = $this->getService('utils/misc')->stringToSlug($tenant->ds_name);
 
       $record = $this->getDao('MDC_MODULE')
         ->insert($tenant);

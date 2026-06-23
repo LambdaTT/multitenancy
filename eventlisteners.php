@@ -75,11 +75,11 @@ class Multitenancy extends EventListener
 
       if (array_key_exists('--tenant-key', $execution->getArgs())) {
         $tenantKey = $execution->getArgs()['--tenant-key'];
-        $tenants = [$this->getService('multitenancy/tenant')->get($tenantKey)];
+        $this->getService('multitenancy/tenant')->get($tenantKey);
       } else {
         $this->getService('multitenancy/tenant')->execPerTenant(function ($tenant) use ($execution, $fullCommand) {
           Utils::printLn();
-          Utils::printLn("\033[35m[MODULE MULTITENANCY]: Executing command for tenant: \033[32m'{$tenant->ds_name} ({$tenant->ds_key})'\033[0m");
+          Utils::printLn("\033[35m[MODULE MULTITENANCY]: Executing command for tenant: \033[32m'{$tenant->ds_name} ({$tenant->ds_subdomain})'\033[0m");
           Utils::printLn();
 
           $newExecution = new Execution(['console', $fullCommand, ...$execution->getArgs()]);

@@ -9,7 +9,7 @@ use SplitPHP\Exceptions\BadRequest;
 
 class Tenant extends Service
 {
-  private static $tenant = null;
+  private static ?object $tenant = null;
 
   public function list($params = [])
   {
@@ -32,8 +32,8 @@ class Tenant extends Service
 
   public function detect()
   {
-    // Find Tenant key from origin's request:
-    $host = isset($_SERVER['HTTP_TENANT_KEY']) ? $_SERVER['HTTP_TENANT_KEY'] : parse_url($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? $_SERVER['HTTP_HOST']))['host'];
+    // Find Tenant key from origin's request subdomain or from HTTP_TENANT_KEY header:
+    $host = self::getHost();
 
     $hostData = explode('.', $host);
     if (empty($hostData)) throw new BadRequest("The request host does not contain a valid tenant key.");
@@ -43,10 +43,11 @@ class Tenant extends Service
     return $this->get($tenantKey);
   }
 
-  public function get($tenantKey)
+  public function get(string $tenantKey)
   {
     self::$tenant = $this->getDao('MTN_TENANT')
-      ->filter('ds_key')->equalsTo($tenantKey)
+      ->filter('ds_subdomain')->equalsTo($tenantKey)
+      ->or('ds_customkey')->equalsTo($tenantKey)
       ->first();
 
     return self::$tenant;
@@ -54,12 +55,17 @@ class Tenant extends Service
 
   public static function getKey()
   {
-    return self::$tenant->ds_key ?? null;
+    return self::$tenant?->ds_subdomain ?? null;
+  }
+
+  public static function getCustomKey()
+  {
+    return self::$tenant?->ds_customkey ?? null;
   }
 
   public static function getName()
   {
-    return self::$tenant->ds_name ?? null;
+    return self::$tenant?->ds_name ?? null;
   }
 
   public static function getHost()
