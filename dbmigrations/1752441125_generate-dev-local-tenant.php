@@ -11,7 +11,7 @@ class GenerateDevLocalTenant extends Migration
     $this->onDatabase('multitenancy')
       ->Table('MTN_TENANT')->Seed(1)
       ->onlyRunInEnvs(['dev', 'development', 'hml', 'test', 'qa'])
-      ->onField('ds_key', true)->setFixedValue('localhost')
+      ->onField('ds_subdomain', true)->setFixedValue('localhost')
       ->onField('ds_name')->setFixedValue('Localhost Dev Tenant')
       ->onField('ds_database_name')->setFixedValue('localhost_dev')
       ->onField('ds_database_user')->setFixedValue('lambdatt_adm')
