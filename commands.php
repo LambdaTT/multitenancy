@@ -15,7 +15,7 @@ class Commands extends Cli
       };
 
       $columns = [
-        'id_mnt_tenant'           => 'ID',
+        'id_snd_tenant'           => 'ID',
         'dt_created'              => 'Created At',
         'ds_name'                => 'Tenant Name',
       ];
@@ -38,31 +38,6 @@ class Commands extends Cli
           'required' => true,
           'length' => 100,
         ],
-        'ds_database_name' => [
-          'label' => 'Database Name',
-          'required' => true,
-          'length' => 100,
-        ],
-        'ds_database_user_main' => [
-          'label' => 'Database Main User',
-          'required' => true,
-          'length' => 100,
-        ],
-        'ds_database_pass_main' => [
-          'label' => 'Database Main User Password',
-          'required' => true,
-          'length' => 100,
-        ],
-        'ds_database_user_readonly' => [
-          'label' => 'Database Read-Only User',
-          'required' => true,
-          'length' => 100,
-        ],
-        'ds_database_pass_readonly' => [
-          'label' => 'Database Read-Only User Password',
-          'required' => true,
-          'length' => 100,
-        ],
         'ds_customkey' => [
           'label' => 'Custom Key (optional)',
           'required' => false,
@@ -70,10 +45,7 @@ class Commands extends Cli
         ],
       ]);
 
-      $tenant->ds_subdomain = $this->getService('utils/misc')->stringToSlug($tenant->ds_name);
-
-      $record = $this->getDao('MDC_MODULE')
-        ->insert($tenant);
+      $record = $this->getService('multitenancy/tenant')->create((array) $tenant);
 
       Utils::printLn("  >> Tenant added successfully!");
       foreach ($record as $key => $value) {
@@ -84,18 +56,16 @@ class Commands extends Cli
     $this->addCommand('tenants:remove', function () {
       Utils::printLn("Welcome to the Tenant Removal Command!");
       Utils::printLn();
-      Utils::printLn('Enter the Tenant ID you wish to remove:');
-      $tenantId = $this->getService('utils/misc')->persistentCliInput(
+      Utils::printLn('Enter the Tenant subdomain or custom key you wish to remove:');
+      $tenantKey = $this->getService('utils/misc')->persistentCliInput(
         function ($v) {
-          return !empty($v) && is_numeric($v);
+          return !empty($v);
         },
-        "Tenant ID must be an integer and cannot be empty or zero. Please try again:"
+        "Tenant key cannot be empty. Please try again:"
       );
 
-      $this->getDao('MNT_TENANT')
-        ->filter('id_mnt_tenant')->equalsTo($tenantId)
-        ->delete();
-      Utils::printLn("  >> Tenant '{$tenantId}' removed successfully!");
+      $this->getService('multitenancy/tenant')->remove($tenantKey);
+      Utils::printLn("  >> Tenant '{$tenantKey}' removed successfully!");
     });
 
     // Help command
@@ -122,7 +92,7 @@ class Commands extends Cli
         ],
         ':tenants:remove' => [
           'usage' => 'multitenancy:tenants:remove',
-          'desc'  => 'Delete a tenant by its ID.',
+          'desc'  => 'Delete a tenant by its subdomain or custom key.',
         ],
         ':tenants:help'             => [
           'usage' => 'multitenancy:tenants:help',
@@ -146,7 +116,7 @@ class Commands extends Cli
         ],
         [
           'cmd'  => 'multitenancy:tenants:remove',
-          'desc' => 'Delete a tenant by ID',
+          'desc' => 'Delete a tenant by subdomain/key',
           'opts' => '(no flags)',
         ],
         [
