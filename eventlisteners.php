@@ -96,7 +96,15 @@ class Multitenancy extends EventListener
 
       $module = $execution->getArgs()['--module'] ?? null;
 
-      if ($module == 'multitenancy' || !Dbmetadata::tableExists('MTN_TENANT')) return;
+      // Control-scoped modules (MULTITENANCY_CONTROL_MODULES, comma-separated): app-registered
+      // modules whose migrations/seeds target the CONTROL database and therefore must run ONCE on
+      // control — never looped per-tenant — exactly like this module's own 'multitenancy' migrations.
+      // Same env-based registration seam as MULTITENANCY_EXEMPT_COMMANDS (no module-load-order
+      // dependency), letting an app own control-DB structure without this generic module naming it.
+      $controlModules = array_filter(array_map('trim', explode(',', getenv('MULTITENANCY_CONTROL_MODULES') ?: '')));
+      $controlModules[] = 'multitenancy';
+
+      if (in_array($module, $controlModules, true) || !Dbmetadata::tableExists('MTN_TENANT')) return;
 
       $evt->stopPropagation();
 
